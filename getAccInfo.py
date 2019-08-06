@@ -1,22 +1,25 @@
-from balanceRetreive import getBalance
+from rpc_calls import *
 import sys
 import csv
 
-def findBalance(name):
+def findInfo(name):
     with open('account_db.csv') as csv_file:
         csv_reader = csv.reader(csv_file, delimiter=',')
         index = 0
         for row in csv_reader:
+            if row[1] == name and index > 0: 
+                return {
+                    "index" : index, 
+                    "spent" : int(row[2]),
+                    "balance" : getBalance(12388, index) - int(row[2]),
+                    "address" : getAddress(12388, index)
+                }
             index += 1
-            if index == 1:
-                print(f'{row[0]}, {row[1]}, {row[2]}')
-                # Ignore header
-            elif row[1] == name:
-                print(f'{row[0]}, {row[1]}, {row[2]}')
-                return getBalance(12388, index) - int(row[2])
 
-    print("Not found, adding")
-    print(str(lines) + "," + name + "," + "0", file=open("account_db.csv", 'a'))
-    return 0
+    print(str(index) + "," + name + "," + "0",
+        file=open("account_db.csv", 'a')) # Create a new account for the user
+    createAccount(12388, index)
+    return findInfo(name)
 
-findBalance(sys.argv[1])
+theirInfo = findInfo(sys.argv[1])
+print(theirInfo)
